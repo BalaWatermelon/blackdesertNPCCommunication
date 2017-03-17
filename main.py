@@ -1,5 +1,7 @@
 # coding=utf-8
+import sys
 import requests
+import re
 from bs4 import BeautifulSoup
 
 
@@ -37,23 +39,50 @@ class Calculate():
                     npc_webpage = requests.get(href)
                     npcSoup = BeautifulSoup(
                         npc_webpage.content, 'html.parser')
+
+                    # Retrieve Intrest for npc
                     npc_intrest = npcSoup.find_all(
-                        'span', class_='c_xingqudu')[0].text.strip()
+                        'span', class_='c_xingqudu')[0].text.split()[1]
+                    print(npc_intrest)
+
+                    # Retrieve Feeling for npc
                     npc_feeling = npcSoup.find_all(
                         'span', class_='c_haogandu')[0].text.strip()
-                    self.intrestNpcList.append(
-                        [npcname, npc_intrest, npc_feeling])
+                    # Check if it is fixed vaule or ranged value.
+                    # TODO: Fix splitting problem to get correct high low
+                    # value.
+                    print(re.split('~～', npc_feeling.split("：")[1]))
+                    '''
+                    if '~' in npc_feeling:
+                        npc_feeling_low, npc_feeling_high = npc_feeling.split()[
+                            1].split(sep='~')
+                    else:
+                        npc_feeling_high, npc_feeling_low = npc_feeling, npc_feeling
+
+
+                    print(npc_name, npc_intrest_low, npc_intrest_high,
+                          npc_feeling_low, npc_feeling_high)
+                          '''
+                    # Append data to list
+                    # self.intrestNpcList.append(
+                    #   [npc_name, npc_intrest_low, npc_intrest_high, npc_feeling_low, npc_feeling_high])
 
             except:
-                print('no id')
+                print(sys.exc_info())
 
     def listAllIntrestInfo(self):
         if not self.intrestNpcList:
             print('No npc in list.')
         else:
             for npc in self.intrestNpcList:
-                print(npc)
+                '{:10}興趣度{:2}~{:2} 好感度{:2}~{:2}'.format(
+                    npc[0], npc[1], npc[2], npc[3], npc[4])
+
+    def splitWave(self, target):
+        low, high = target.split()[1].split(sep='~')
+        return low, high
 
 if __name__ == '__main__':
     myCalculate = Calculate()
     myCalculate.crawl()
+    myCalculate.listAllIntrestInfo()
