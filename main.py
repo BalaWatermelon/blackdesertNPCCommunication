@@ -9,7 +9,11 @@ class Calculate():
 
     def __init__(self):
         self.characterName = ''
+        self.characterInterest = 0
+        self.characterFeelingLow = 0
+        self.characterFeelingHigh = 0
         self.intrestNpcList = []
+        self.talkingTurns = 3
 
     # Crawl target character's intrest npc's name, intrest and feeling.
     def crawl(self):
@@ -52,30 +56,82 @@ class Calculate():
                     # Check if it is fixed vaule or ranged value.
                     # TODO: Fix splitting problem to get correct high low
                     # value.
-                    npc_feeling_low, npc_feeling_high = re.split('~|～', npc_feeling.split("：")[1])
+                    npc_feeling_low, npc_feeling_high = re.split(
+                        '~|～', npc_feeling.split("：")[1])
 
                     # Append data to list
                     self.intrestNpcList.append(
-                      [npc_name, npc_intrest, npc_feeling_low, npc_feeling_high])
-                      
+                        [npc_name, npc_intrest, npc_feeling_low, npc_feeling_high])
+
             except KeyboardInterrupt:
                 sys.exit()
             except:
-                print(sys.exc_info())
+                a = sys.exc_info()
+        self.calculateBestMatch()
+
+    def calculateBestMatch(self):
+        while self.talkingTurns>0:
+            if self.getCharacterValue() and self.getTalkingTarget():
+                self.printBestList()
+            self.talkingTurns-=1
+        self.reset()
+        self.calculateBestMatch()
+
+    def printBestList(self):
+        tmpNpcList = self.intrestNpcList
+        for npc in tmpNpcList:
+            npc[1] = int(npc[1])-int(self.characterInterest)
+            avgFeeling = (int(npc[2])+int(npc[3]))/2
+            npc.append(avgFeeling)
+        print(tmpNpcList)
+
+    def getCharacterValue(self):
+        while self.characterInterest is 0:
+            self.characterInterest = raw_input('>>> Interest:')
+            try:
+                int(self.characterInterest)
+            except:
+                self.characterInterest = 0
+        while self.characterFeelingLow is 0:
+            self.characterFeelingLow = raw_input('>>> FeelingLow:')
+            try:
+                int(self.characterFeelingLow)
+            except:
+                self.characterFeelingLow = 0
+        while self.characterFeelingHigh is 0:
+            self.characterFeelingHigh = raw_input('>>> FeelingHigh:')
+            try:
+                int(self.characterFeelingHigh)
+            except:
+                self.characterFeelingHigh = 0
+        print('Interset:{} Low:{} High:{}')
+        return True
+
+    def getTalkingTarget(self):
+        while self.getTalkingTarget is None:
+            # TODO: Fool proof for input
+            self.getTalkingTarget = raw_input('>>> Target(ex.g3, b2):')
+        return True
 
     def listAllIntrestInfo(self):
         if not self.intrestNpcList:
             print('No npc in list.')
         else:
             for npc in self.intrestNpcList:
-                '{:10}興趣度{:2}~{:2} 好感度{:2}~{:2}'.format(
-                    npc[0], npc[1], npc[2], npc[3], npc[4])
+                print('{:_<15}興趣度{:_<5} 好感度{:_<5}~{:_<5}'.format(
+                    npc[0], npc[1], npc[2], npc[3]))
 
-    def splitWave(self, target):
-        low, high = target.split()[1].split(sep='~')
-        return low, high
+    def reset(self):
+        self.characterName = ''
+        self.characterInterest = 0
+        self.characterFeelingLow = 0
+        self.characterFeelingHigh = 0
+        self.intrestNpcList = []
+        self.talkingTurns = 3
+
 
 if __name__ == '__main__':
     myCalculate = Calculate()
+    # Add options for selecting npc.
     myCalculate.crawl()
     myCalculate.listAllIntrestInfo()
