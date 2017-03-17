@@ -32,8 +32,10 @@ class Calculate():
 
                 # Check if it is npc. npc has only three digits
                 if len(character_id) == 3:
+                    # Get npc name
                     npc_name = item.find_all(
                         'td', class_='k_title')[0].a.text.strip()
+
                     # This is an npc, get link for it.
                     href = item.find_all('td', class_='k_title')[0].a['href']
                     npc_webpage = requests.get(href)
@@ -43,7 +45,6 @@ class Calculate():
                     # Retrieve Intrest for npc
                     npc_intrest = npcSoup.find_all(
                         'span', class_='c_xingqudu')[0].text.split()[1]
-                    print(npc_intrest)
 
                     # Retrieve Feeling for npc
                     npc_feeling = npcSoup.find_all(
@@ -51,22 +52,14 @@ class Calculate():
                     # Check if it is fixed vaule or ranged value.
                     # TODO: Fix splitting problem to get correct high low
                     # value.
-                    print(re.split('~～', npc_feeling.split("：")[1]))
-                    '''
-                    if '~' in npc_feeling:
-                        npc_feeling_low, npc_feeling_high = npc_feeling.split()[
-                            1].split(sep='~')
-                    else:
-                        npc_feeling_high, npc_feeling_low = npc_feeling, npc_feeling
+                    npc_feeling_low, npc_feeling_high = re.split('~|～', npc_feeling.split("：")[1])
 
-
-                    print(npc_name, npc_intrest_low, npc_intrest_high,
-                          npc_feeling_low, npc_feeling_high)
-                          '''
                     # Append data to list
-                    # self.intrestNpcList.append(
-                    #   [npc_name, npc_intrest_low, npc_intrest_high, npc_feeling_low, npc_feeling_high])
-
+                    self.intrestNpcList.append(
+                      [npc_name, npc_intrest, npc_feeling_low, npc_feeling_high])
+                      
+            except KeyboardInterrupt:
+                sys.exit()
             except:
                 print(sys.exc_info())
 
